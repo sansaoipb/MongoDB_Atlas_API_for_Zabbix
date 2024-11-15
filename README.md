@@ -36,3 +36,7 @@ Como obter API KEY MongoDB Atlas
 - Private Key -> {$PASS_KEY}
 
 ![getAPIKEY](https://docs.stacktape.com/static/88a0f7162948f75898c7f3a7d8160e5a/a94c1/screen10-mod.png)
+
+As informações devem ser passadas nas MACROS abaixo:
+
+![MACROS](https://github.com/Wigney-Sarmento/MongoDB-Atlas-API-for-Zabbix/blob/main/MACROS_Template.png)
