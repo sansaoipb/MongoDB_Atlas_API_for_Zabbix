@@ -8,6 +8,7 @@ zabbix_export:
     - uuid: b259e96c42a44770857a8baeab70bc40
       template: 'Mongo Atlas API'
       name: 'Mongo Atlas API'
+      description: Developed by https://www.linkedin.com/in/wigneysarmento
       groups:
         - name: Templates
       items:
