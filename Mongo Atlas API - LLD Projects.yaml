@@ -1,0 +1,139 @@
+zabbix_export:
+  version: '6.0'
+  date: '2024-12-02T18:27:18Z'
+  groups:
+    - uuid: adb6e5bbe7244a2fa20fa4595ec4cec1
+      name: Hosts/PRD/Databases/MongoAtlas
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 3ef47a78415241ccbcd8ee84e9e27c70
+      template: 'Mongo Atlas API - LLD Projects'
+      name: 'Mongo Atlas API - LLD Projects'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 2514c40388bf4a5996bd82875d023fa7
+          name: 'Get Projects'
+          type: HTTP_AGENT
+          key: get.project
+          delay: 0;h/1
+          trends: '0'
+          value_type: TEXT
+          authtype: DIGEST
+          username: '{$PUBLIC.KEY}'
+          password: '{$PRIVATE.KEY}'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var originalJson = JSON.parse(value).results
+                  
+                  var keysToKeep = ["name", "id", "links", "created", "clusterCount"];
+                  var filteredJsonList = [];
+                  
+                  for (var i = 0; i < originalJson.length; i++) {
+                    var filteredObject = {};
+                    var currentObject = originalJson[i];
+                  
+                    for (var key in currentObject) {
+                      if (keysToKeep.indexOf(key) !== -1) {
+                  
+                        var valor = currentObject[key];
+                        var chave = key
+                        if ("links" == key){
+                          var valor = currentObject[key][0].href
+                  
+                        } else if ("created" == key){
+                          //filteredObject["created_cluster_ts"] = Math.floor(new Date(valor).getTime() / 1000);
+                  
+                          date = new Date(valor)
+                          date.setHours(date.getHours() - 3);
+                          adjustedDate = date.toISOString().slice(0, 19).replace("T", " ");
+                  
+                          var valor = adjustedDate
+                          var chave = "created_cluster"
+                  
+                        } else if ("name" == key){
+                          filteredObject["name_upper"] = currentObject[key].toUpperCase();
+                  
+                        }
+                  
+                        filteredObject[chave] = valor;
+                      }
+                    }
+                  
+                    filteredJsonList.push(filteredObject);
+                  }
+                  
+                  return JSON.stringify(filteredJsonList, null, 2)
+          timeout: 30s
+          url: 'https://cloud.mongodb.com/api/atlas/v1.0/orgs/{$ORG.ID}/groups'
+      discovery_rules:
+        - uuid: 8118c0610bfa440a966fbea7c39716f0
+          name: 'Discovery Projects'
+          type: DEPENDENT
+          key: project.discovery
+          delay: '0'
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#COUNT.CLUSTER}'
+                value: '{$COUNT.CLUSTER.MATCHES}'
+                formulaid: A
+              - macro: '{#NAME}'
+                value: '{$NAME.MATCHES}'
+                formulaid: B
+              - macro: '{#NAME}'
+                value: '{$NAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: C
+          lifetime: '0'
+          host_prototypes:
+            - uuid: 379a8833cf7e4e70a55178586efba2a3
+              host: '{#ID}_{#NAME}'
+              name: 'Mongo Atlas: {#NAME.UPPER}'
+              group_links:
+                - group:
+                    name: Hosts/PRD/Databases/MongoAtlas
+              templates:
+                - name: 'Mongo Atlas API - LLD'
+              macros:
+                - macro: '{$URL.BASE}'
+                  value: '{#LINKS}'
+              tags:
+                - tag: created
+                  value: '{{#CREATED.CLUSTER}.regsub("(\d+)-(\d+)-(\d+) (.+)", "\3/\2/\1 \4")}'
+              inventory_mode: AUTOMATIC
+          master_item:
+            key: get.project
+          lld_macro_paths:
+            - lld_macro: '{#COUNT.CLUSTER}'
+              path: $.clusterCount
+            - lld_macro: '{#CREATED.CLUSTER}'
+              path: $.created_cluster
+            - lld_macro: '{#ID}'
+              path: $.id
+            - lld_macro: '{#LINKS}'
+              path: $.links
+            - lld_macro: '{#NAME.UPPER}'
+              path: $.name_upper
+            - lld_macro: '{#NAME}'
+              path: $.name
+      macros:
+        - macro: '{$COUNT.CLUSTER.MATCHES}'
+          value: '\b([1-9]\d*)\b'
+          description: 'Discovery for those with Cluster'
+        - macro: '{$NAME.MATCHES}'
+          value: .+
+        - macro: '{$NAME.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+        - macro: '{$ORG.ID}'
+          value: ''
+          description: 'Organization Name: XXXX'
+        - macro: '{$PRIVATE.KEY}'
+          value: ''
+          description: 'Password the API key obtained from MongoDB Atlas.'
+        - macro: '{$PUBLIC.KEY}'
+          value: ''
+          description: 'User the API key obtained from MongoDB Atlas.'

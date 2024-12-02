@@ -1,0 +1,1126 @@
+zabbix_export:
+  version: '6.0'
+  date: '2024-12-02T18:27:09Z'
+  groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 271a81478e4e40fca3bde1389b0a7a49
+      template: 'Mongo Atlas API - LLD'
+      name: 'Mongo Atlas API - LLD Clusters and Nodes'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 992e561ea74243b6a072777085828b7e
+          name: 'Hardware Metrics Cluster'
+          type: HTTP_AGENT
+          key: hardware.metrics.cluster
+          delay: 3m
+          trends: '0'
+          value_type: TEXT
+          authtype: DIGEST
+          username: '{$PUBLIC.KEY}'
+          password: '{$PRIVATE.KEY}'
+          url: '{$URL.BASE}/clusters'
+          tags:
+            - tag: type
+              value: Cluster
+        - uuid: ec37a958540e40e3a41c59bb3ee29a4c
+          name: 'Hardware Metrics Nodes'
+          type: HTTP_AGENT
+          key: hardware.metrics.nodes
+          delay: 3m
+          trends: '0'
+          value_type: TEXT
+          authtype: DIGEST
+          username: '{$PUBLIC.KEY}'
+          password: '{$PRIVATE.KEY}'
+          url: '{$URL.BASE}/processes'
+          tags:
+            - tag: type
+              value: Node
+      discovery_rules:
+        - uuid: 7c8cc88fb40444dda4aa19cb6b682bc3
+          name: 'Discovery Clusters'
+          type: DEPENDENT
+          key: clusters.discovery
+          delay: '0'
+          lifetime: 7d
+          item_prototypes:
+            - uuid: 71cca21bdeb74744b5a711bb2a76d11c
+              name: 'Cluster: {#CLUSTER.NAME} - autoScaling - compute'
+              type: DEPENDENT
+              key: 'cluster.autoscaling.computer[{#CLUSTER.NAME},{#CLUSTER.ID}]'
+              delay: '0'
+              description: 'Create date: {{#CREATED}.regsub("(\d{4})-(\d{2})-(\d{2})T(.+)Z", "\3/\2/\1 \4")}'
+              valuemap:
+                name: 'Booleano Mongo Atlas'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.results[?(@.id=="{#CLUSTER.ID}")].autoScaling.compute.enabled.first()'
+                - type: BOOL_TO_DECIMAL
+                  parameters:
+                    - ''
+              master_item:
+                key: hardware.metrics.cluster
+              tags:
+                - tag: cluster
+                  value: '{#CLUSTER.NAME}'
+                - tag: type
+                  value: Cluster
+            - uuid: ff91eb751e0d4db9a842b1c84d30f3cb
+              name: 'Cluster: {#CLUSTER.NAME} - autoScaling - DiskGBEnabled'
+              type: DEPENDENT
+              key: 'cluster.autoscaling.diskGBEnabled[{#CLUSTER.NAME},{#CLUSTER.ID}]'
+              delay: '0'
+              description: 'Create date: {{#CREATED}.regsub("(\d{4})-(\d{2})-(\d{2})T(.+)Z", "\3/\2/\1 \4")}'
+              valuemap:
+                name: 'Booleano Mongo Atlas'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.results[?(@.id=="{#CLUSTER.ID}")].autoScaling.diskGBEnabled.first()'
+                - type: BOOL_TO_DECIMAL
+                  parameters:
+                    - ''
+              master_item:
+                key: hardware.metrics.cluster
+              tags:
+                - tag: cluster
+                  value: '{#CLUSTER.NAME}'
+                - tag: type
+                  value: Cluster
+            - uuid: 3580a034a14844e9919f8903be668192
+              name: 'Cluster: {#CLUSTER.NAME} - diskSizeGB'
+              type: DEPENDENT
+              key: 'cluster.autoscaling.diskSizeGB[{#CLUSTER.NAME},{#CLUSTER.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              description: 'Create date: {{#CREATED}.regsub("(\d{4})-(\d{2})-(\d{2})T(.+)Z", "\3/\2/\1 \4")}'
+              valuemap:
+                name: 'Booleano Mongo Atlas'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.results[?(@.id=="{#CLUSTER.ID}")].diskSizeGB.first()'
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      // O valor de entrada do item é recebido como a variável 'value'
+                      // Assumindo que o valor está em gigabytes (GB)
+                      
+                      // Converte GB para B
+                      var gbValue = parseFloat(value);
+                      var bytesValue = gbValue * 1024 * 1024 * 1024;
+                      
+                      // Retorna o valor em bytes
+                      return bytesValue;
+              master_item:
+                key: hardware.metrics.cluster
+              tags:
+                - tag: cluster
+                  value: '{#CLUSTER.NAME}'
+                - tag: metric
+                  value: Disk
+                - tag: type
+                  value: Cluster
+            - uuid: 593b0fe51df74086a7d2c8cecadc68af
+              name: 'Cluster: {#CLUSTER.NAME} - instanceSizeName'
+              type: DEPENDENT
+              key: 'cluster.instanceSizeName[{#CLUSTER.NAME},{#CLUSTER.ID}]'
+              delay: '0'
+              trends: '0'
+              value_type: TEXT
+              description: 'Create date: {{#CREATED}.regsub("(\d{4})-(\d{2})-(\d{2})T(.+)Z", "\3/\2/\1 \4")}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.results[?(@.id=="{#CLUSTER.ID}")].providerSettings.instanceSizeName.first()'
+              master_item:
+                key: hardware.metrics.cluster
+              tags:
+                - tag: cluster
+                  value: '{#CLUSTER.NAME}'
+                - tag: type
+                  value: Cluster
+            - uuid: 7ee3fc77df8549d89ebdf136ce7cc2a0
+              name: 'Cluster: {#CLUSTER.NAME} - scaleDownEnabled - compute'
+              type: DEPENDENT
+              key: 'cluster.scaleDownEnabled.computer[{#CLUSTER.NAME},{#CLUSTER.ID}]'
+              delay: '0'
+              description: 'Create date: {{#CREATED}.regsub("(\d{4})-(\d{2})-(\d{2})T(.+)Z", "\3/\2/\1 \4")}'
+              valuemap:
+                name: 'Booleano Mongo Atlas'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.results[?(@.id=="{#CLUSTER.ID}")].autoScaling..scaleDownEnabled.first()'
+                - type: BOOL_TO_DECIMAL
+                  parameters:
+                    - ''
+              master_item:
+                key: hardware.metrics.cluster
+              tags:
+                - tag: cluster
+                  value: '{#CLUSTER.NAME}'
+                - tag: type
+                  value: Cluster
+          master_item:
+            key: hardware.metrics.cluster
+          lld_macro_paths:
+            - lld_macro: '{#CLUSTER.ID}'
+              path: $.id
+            - lld_macro: '{#CLUSTER.NAME}'
+              path: $.name
+            - lld_macro: '{#CREATED}'
+              path: $.createDate
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.results
+        - uuid: 7aa92a5be5ae485abb00661195859388
+          name: 'Discovery Nodes'
+          type: DEPENDENT
+          key: nodes.discovery
+          delay: '0'
+          lifetime: 7d
+          item_prototypes:
+            - uuid: 95718225c3604f1b986fc7f966918a99
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Connections'
+              type: DEPENDENT
+              key: 'connections[{#NODE.ID}]'
+              delay: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''CONNECTIONS'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Connections
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+              trigger_prototypes:
+                - uuid: f81a2533fd6f46dc9b5cb6f6aa15c09b
+                  expression: 'min(/Mongo Atlas API - LLD/connections[{#NODE.ID}],#3)>{$CONNECTIONS:"{#NODE.ALIAS}"}'
+                  name: 'MongoDB Node Connections'
+                  event_name: 'Connections - Node {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                  priority: HIGH
+                  description: |
+                    Encaminhar Alarme para Almir Petrecca 
+                    
+                    Fora do horário comercial  09:00 as 19:00, Após encaminhar para V8
+                  manual_close: 'YES'
+            - uuid: bffdf70491a941cb848ed80b2bde71a8
+              name: 'Get Node {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+              type: HTTP_AGENT
+              key: 'get.node[{#NODE.ID}]'
+              delay: 3m
+              trends: '0'
+              value_type: TEXT
+              authtype: DIGEST
+              username: '{$PUBLIC.KEY}'
+              password: '{$PRIVATE.KEY}'
+              url: '{$URL.BASE}/processes/{#NODE.ID}/measurements?granularity=PT{$TIME.GRANULARITY}&period=PT{$TIME.PERIOD}'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 85e74ef2349a45c99ba729f6b836da24
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Global Lock Current Queue Readers'
+              type: DEPENDENT
+              key: 'global.lock.current.queue.readers[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''GLOBAL_LOCK_CURRENT_QUEUE_READERS'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Lock
+                - tag: metric_name
+                  value: 'Global Lock Current Queue'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 76621d5b10ed4552acf3cdd150cb8aae
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Global Lock Current Queue Total'
+              type: DEPENDENT
+              key: 'global.lock.current.queue.total[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''GLOBAL_LOCK_CURRENT_QUEUE_TOTAL'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Lock
+                - tag: metric_name
+                  value: 'Global Lock Current Queue'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+              trigger_prototypes:
+                - uuid: ac6076259b424b31824acbb34a99a8dc
+                  expression: 'min(/Mongo Atlas API - LLD/global.lock.current.queue.total[{#NODE.ID}],#3)>{$GLOBAL.QUEUE.TOTAL:"{#NODE.ALIAS}"}'
+                  name: 'MongoDB Node Global Lock Current Queue Total'
+                  event_name: 'Global Lock Current Queue Total - Node {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                  priority: HIGH
+                  description: |
+                    Encaminhar Alarme para Almir Petrecca 
+                    
+                    Fora do horário comercial  09:00 as 19:00, Após encaminhar para V8
+                  manual_close: 'YES'
+            - uuid: 4a81fa7eea714ac68e9a7982536b8b3a
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Global Lock Current Queue Writers'
+              type: DEPENDENT
+              key: 'global.lock.current.queue.writers[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''GLOBAL_LOCK_CURRENT_QUEUE_WRITERS'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Lock
+                - tag: metric_name
+                  value: 'Global Lock Current Queue'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: b6763ff7fad141e5b3828253a2fc9ff2
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Last Ping Time'
+              type: DEPENDENT
+              key: 'last.ping.time[{#NODE.ID}]'
+              delay: '0'
+              units: s
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      timestampInSeconds = value
+                      timestampInSecondsAtual = Math.floor(Date.now() / 1000);
+                      return (timestampInSecondsAtual - timestampInSeconds)
+              master_item:
+                key: 'last.ping[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: LastPing
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+              trigger_prototypes:
+                - uuid: f43e470cd244462e8d75a8b1ad1212c5
+                  expression: 'min(/Mongo Atlas API - LLD/last.ping.time[{#NODE.ID}],#3)>{$LAST.PING.TIME:"{#NODE.ALIAS}"}'
+                  name: 'MongoDB Node Last Ping Time'
+                  event_name: 'Last Ping Time - Node {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                  priority: HIGH
+                  description: |
+                    Encaminhar Alarme para Almir Petrecca 
+                    
+                    Fora do horário comercial  09:00 as 19:00, Após encaminhar para V8
+                  manual_close: 'YES'
+            - uuid: 1a8ba8ab094148ee913229877c6660fe
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Last Ping'
+              type: DEPENDENT
+              key: 'last.ping[{#NODE.ID}]'
+              delay: '0'
+              units: unixtime
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.results[?(@.id== ''{#NODE.ID}'')].lastPing.first()'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return Math.floor(new Date(value).getTime() / 1000);'
+              master_item:
+                key: hardware.metrics.nodes
+              tags:
+                - tag: cluster
+                  value: LastPing
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+              trigger_prototypes:
+                - uuid: 56657fc0b27b4bf393559ca30550f85e
+                  expression: 'last(/Mongo Atlas API - LLD/last.ping[{#NODE.ID}],#2)=last(/Mongo Atlas API - LLD/last.ping[{#NODE.ID}])'
+                  name: 'MongoDB Node Unreachable Alert'
+                  event_name: 'MongoDB Node {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} Unreachable Alert'
+                  discover: NO_DISCOVER
+                  priority: HIGH
+                  manual_close: 'YES'
+            - uuid: 759a381fdfab4596a3e89aaede7b4bc1
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Network Bytes In'
+              type: DEPENDENT
+              key: 'network.bytes.in[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''NETWORK_BYTES_IN'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Network
+                - tag: metric_name
+                  value: 'Network Bytes Out'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 5e4705b613194f1791196e7a0736abfb
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Network Bytes Out'
+              type: DEPENDENT
+              key: 'network.bytes.out[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''NETWORK_BYTES_OUT'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Network
+                - tag: metric_name
+                  value: 'Network Bytes Out'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 28f88e084a8442b68b6e091abd0fd92d
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Network Num Requests'
+              type: DEPENDENT
+              key: 'network.num.requests[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: Bps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''NETWORK_NUM_REQUESTS'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Network
+                - tag: metric_name
+                  value: 'Network Num Requests'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+              trigger_prototypes:
+                - uuid: 44a6fdb015b44cb9ad87dbaa96b18e07
+                  expression: 'min(/Mongo Atlas API - LLD/network.num.requests[{#NODE.ID}],#3)>{$NETWORK.NUM.REQUESTS:"{#NODE.ALIAS}"}'
+                  name: 'MongoDB Node Network Num Requests'
+                  event_name: 'Network Num Requests - Node {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                  priority: HIGH
+                  description: |
+                    Encaminhar Alarme para Almir Petrecca 
+                    
+                    Fora do horário comercial  09:00 as 19:00, Após encaminhar para V8
+                  manual_close: 'YES'
+            - uuid: 17968c5e58274497acfb8bf8cb28073e
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - OpCounter CMD'
+              type: DEPENDENT
+              key: 'op.counter.cmd[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: Bps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''OPCOUNTER_CMD'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: OpCounter
+                - tag: metric_name
+                  value: 'Op Counter CMD'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 1339352da39b4ecea44859d3f77654fc
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - OpCounter Delete'
+              type: DEPENDENT
+              key: 'op.counter.delete[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: Bps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''OPCOUNTER_DELETE'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: OpCounter
+                - tag: metric_name
+                  value: 'Op Counter Delete'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: c7a21d257046465795f695dc098a1f26
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - OpCounter Getmore'
+              type: DEPENDENT
+              key: 'op.counter.getmore[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: Bps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''OPCOUNTER_GETMORE'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: OpCounter
+                - tag: metric_name
+                  value: 'Op Counter Getmore'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: a8a010951ea14d9c94e3c586b9f1141a
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - OpCounter Insert'
+              type: DEPENDENT
+              key: 'op.counter.insert[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: Bps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''OPCOUNTER_INSERT'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: OpCounter
+                - tag: metric_name
+                  value: 'Op Counter Insert'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 78592b72eeb944e8b1583fab910cf5dc
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - OpCounter Query'
+              type: DEPENDENT
+              key: 'op.counter.query[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: Bps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''OPCOUNTER_QUERY'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: OpCounter
+                - tag: metric_name
+                  value: 'Op Counter Query'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 76d3b47162624996919c8f6b7704a940
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - OpCounter TTL Deleted'
+              type: DEPENDENT
+              key: 'op.counter.ttl.deleted[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: Bps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''OPCOUNTER_TTL_DELETED'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: OpCounter
+                - tag: metric_name
+                  value: 'Op Counter TTL Deleted'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: f6200c986efb4e5fa7e86f4e85183880
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - OpCounter Update'
+              type: DEPENDENT
+              key: 'op.counter.update[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: Bps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''OPCOUNTER_UPDATE'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: OpCounter
+                - tag: metric_name
+                  value: 'Op Counter Update'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: ecb8bdf4984c45d0a4ed047ad31e82ed
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Memory Available'
+              type: DEPENDENT
+              key: 'system.memory.available[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_MEMORY_AVAILABLE'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Memory
+                - tag: metric_name
+                  value: 'System Memory'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 1b01268563e44440862d4b5bf9c45da3
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Memory Buffers'
+              type: DEPENDENT
+              key: 'system.memory.buffers[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_MEMORY_BUFFERS'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Memory
+                - tag: metric_name
+                  value: 'System Memory'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 87be494978954463b2e330fee0facf37
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Memory Cached'
+              type: DEPENDENT
+              key: 'system.memory.cached[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_MEMORY_CACHED'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Memory
+                - tag: metric_name
+                  value: 'System Memory'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 0928da61dbc74822803936e12c390118
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Memory Free'
+              type: DEPENDENT
+              key: 'system.memory.free[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_MEMORY_FREE'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Memory
+                - tag: metric_name
+                  value: 'System Memory'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: f02461f58954420ab9ba9a25a4b5db61
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Memory Shared'
+              type: DEPENDENT
+              key: 'system.memory.shared[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_MEMORY_SHARED'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Memory
+                - tag: metric_name
+                  value: 'System Memory'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 73909b31eb1a4e3f8bcd0f3f134bb733
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Memory Used'
+              type: DEPENDENT
+              key: 'system.memory.used[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_MEMORY_USED'')].dataPoints[-1].value.first()'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: Memory
+                - tag: metric_name
+                  value: 'System Memory'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: a723bd54ef9e41839d3c4238c696d20a
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - CPU Guest'
+              type: DEPENDENT
+              key: 'system.normalized.cpu.guest[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_NORMALIZED_CPU_GUEST'')].dataPoints[-1].value.first()'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return Math.round(value * 100) / 100'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: CPU
+                - tag: metric_name
+                  value: 'System Normalized CPU'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: a07eed3b70364435a15a181e543ff9ff
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - CPU IOWait'
+              type: DEPENDENT
+              key: 'system.normalized.cpu.iowait[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_NORMALIZED_CPU_IOWAIT'')].dataPoints[-1].value.first()'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return Math.round(value * 100) / 100'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: CPU
+                - tag: metric_name
+                  value: 'System Normalized CPU'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+              trigger_prototypes:
+                - uuid: 3d07c5517c3742e6ba651c19fae9595d
+                  expression: 'min(/Mongo Atlas API - LLD/system.normalized.cpu.iowait[{#NODE.ID}],#3)>{$CPU.IOWAIT:"{#NODE.ALIAS}"}'
+                  name: 'MongoDB Node CPU IOWait'
+                  event_name: 'CPU IOWait - Node {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                  priority: HIGH
+                  description: |
+                    Encaminhar Alarme para Almir Petrecca 
+                    
+                    Fora do horário comercial  09:00 as 19:00, Após encaminhar para V8
+                  manual_close: 'YES'
+            - uuid: 80217702519b4a548adfae693a0497d3
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - CPU IRQ'
+              type: DEPENDENT
+              key: 'system.normalized.cpu.irq[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_NORMALIZED_CPU_IRQ'')].dataPoints[-1].value.first()'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return Math.round(value * 100) / 100'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: CPU
+                - tag: metric_name
+                  value: 'System Normalized CPU'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: e83582e1f1b24edf960f34c0c67d87b9
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - CPU Kernel'
+              type: DEPENDENT
+              key: 'system.normalized.cpu.kernel[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_NORMALIZED_CPU_KERNEL'')].dataPoints[-1].value.first()'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return Math.round(value * 100) / 100'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: CPU
+                - tag: metric_name
+                  value: 'System Normalized CPU'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: b57814e5959741f29cee7ac001e81e27
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - CPU Nice'
+              type: DEPENDENT
+              key: 'system.normalized.cpu.nice[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_NORMALIZED_CPU_NICE'')].dataPoints[-1].value.first()'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return Math.round(value * 100) / 100'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: CPU
+                - tag: metric_name
+                  value: 'System Normalized CPU'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: e7c52a40312647a4bfeb6629273d8ab6
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - CPU SOFTIRQ'
+              type: DEPENDENT
+              key: 'system.normalized.cpu.softirq[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_NORMALIZED_CPU_SOFTIRQ'')].dataPoints[-1].value.first()'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return Math.round(value * 100) / 100'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: CPU
+                - tag: metric_name
+                  value: 'System Normalized CPU'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: d8a9e2a211754ee0845c66ebe58d057e
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - CPU Steal'
+              type: DEPENDENT
+              key: 'system.normalized.cpu.steal[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_NORMALIZED_CPU_STEAL'')].dataPoints[-1].value.first()'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return Math.round(value * 100) / 100'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: CPU
+                - tag: metric_name
+                  value: 'System Normalized CPU'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+            - uuid: 0792fefe422a422aba34147ea0478a68
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - CPU User'
+              type: DEPENDENT
+              key: 'system.normalized.cpu.user[{#NODE.ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.measurements[?(@.name == ''SYSTEM_NORMALIZED_CPU_USER'')].dataPoints[-1].value.first()'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return Math.round(value * 100) / 100'
+              master_item:
+                key: 'get.node[{#NODE.ID}]'
+              tags:
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: metric
+                  value: CPU
+                - tag: metric_name
+                  value: 'System Normalized CPU'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+              trigger_prototypes:
+                - uuid: a186755b85444c799b0f471861c15e1e
+                  expression: 'min(/Mongo Atlas API - LLD/system.normalized.cpu.user[{#NODE.ID}],#3)>{$CPU.USER:"{#NODE.ALIAS}"}'
+                  name: 'MongoDB Node CPU User'
+                  event_name: 'CPU User - Node {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                  priority: HIGH
+                  description: |
+                    Encaminhar Alarme para Almir Petrecca 
+                    
+                    Fora do horário comercial  09:00 as 19:00, Após encaminhar para V8
+                  manual_close: 'YES'
+            - uuid: 8f95583096224e8089119bfffa3af5ff
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Type Node'
+              type: DEPENDENT
+              key: 'typenode[{#NODE.ID}]'
+              delay: '0'
+              trends: '0'
+              value_type: TEXT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.results[?(@.id== ''{#NODE.ID}'')].typeName.first()'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 12h
+              master_item:
+                key: hardware.metrics.nodes
+              tags:
+                - tag: cluster
+                  value: TypeNode
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+              trigger_prototypes:
+                - uuid: 5eebdf5285e4498baf572f689988032c
+                  expression: 'last(/Mongo Atlas API - LLD/typenode[{#NODE.ID}],#2)<>last(/Mongo Atlas API - LLD/typenode[{#NODE.ID}])'
+                  name: 'MongoDB Node Role Change Alert'
+                  event_name: 'MongoDB Node {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} Role Change Alert {ITEM.LASTVALUE}'
+                  discover: NO_DISCOVER
+                  priority: AVERAGE
+                  manual_close: 'YES'
+            - uuid: 28cd2ead691a4932b6034788d113081b
+              name: 'Node: {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} - Version Node'
+              type: DEPENDENT
+              key: 'versionNode[{#NODE.ID}]'
+              delay: '0'
+              trends: '0'
+              value_type: TEXT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.results[?(@.id== ''{#NODE.ID}'')].version.first()'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 12h
+              master_item:
+                key: hardware.metrics.nodes
+              tags:
+                - tag: cluster
+                  value: VersionNode
+                - tag: cluster
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+)-shard-[0-9-]+.+mongodb.net)", \2)}'
+                - tag: node
+                  value: '{{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)}'
+                - tag: type
+                  value: Node
+              trigger_prototypes:
+                - uuid: 7536a45de98344a295a0d8beb5600612
+                  expression: 'last(/Mongo Atlas API - LLD/versionNode[{#NODE.ID}],#2)<>last(/Mongo Atlas API - LLD/versionNode[{#NODE.ID}])'
+                  name: 'MongoDB Node Version Change Detected'
+                  event_name: 'MongoDB Node {{#NODE.ALIAS}.iregsub("(([a-z0-9-]+).+mongodb.net)", \2)} Version Change Detected'
+                  discover: NO_DISCOVER
+                  priority: AVERAGE
+                  manual_close: 'YES'
+          master_item:
+            key: hardware.metrics.nodes
+          lld_macro_paths:
+            - lld_macro: '{#NODE.ALIAS}'
+              path: $.userAlias
+            - lld_macro: '{#NODE.ID}'
+              path: $.id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.results
+      macros:
+        - macro: '{$CONNECTIONS}'
+          value: '2500'
+        - macro: '{$CPU.IOWAIT}'
+          value: '50'
+        - macro: '{$CPU.USER}'
+          value: '80'
+        - macro: '{$GLOBAL.QUEUE.TOTAL}'
+          value: '6'
+        - macro: '{$LAST.PING.TIME}'
+          value: 100s
+        - macro: '{$NETWORK.NUM.REQUESTS}'
+          value: '800'
+        - macro: '{$PRIVATE.KEY}'
+          value: ''
+          description: 'Private Key the API key obtained from MongoDB Atlas.'
+        - macro: '{$PUBLIC.KEY}'
+          value: ''
+          description: 'Public Key the API key obtained from MongoDB Atlas.'
+        - macro: '{$TIME.GRANULARITY}'
+          value: 1M
+        - macro: '{$TIME.PERIOD}'
+          value: 10M
+      valuemaps:
+        - uuid: e0e3f8a810bb408699050049daa123ac
+          name: 'Booleano Mongo Atlas'
+          mappings:
+            - value: '0'
+              newvalue: Disabled
+            - value: '1'
+              newvalue: Enabled
