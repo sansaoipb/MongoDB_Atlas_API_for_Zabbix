@@ -31,9 +31,9 @@ Como obter API KEY MongoDB Atlas
 
 ### Zabbix:
 
-- Importe o template no seu servidor Zabbix.
+- Importe os templates em seu Zabbix.
 - As informações devem ser passadas nas MACROS dentro dos dois templates.
-- Configure um Host no Zabbix com o template <i>"Mongo Atlas API - LLD Projects"</i> para descobrir os projetos criados no MongoDB Atlas, e com isso ele descobrirá somente os projetos que tiverem cluster criado.
+- Crie e configure <b>um Host no Zabbix</b> com o template <i>"Mongo Atlas API - LLD Projects"</i> para descobrir os projetos criados no MongoDB Atlas, e com isso ele descobrirá e criará um host para cada projeto que houver cluster vinculado.
 
 Após a configuração, as métricas estarão disponíveis no Zabbix para análise e alertas em tempo real.
 
