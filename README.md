@@ -1,13 +1,15 @@
 # Doações
 <table>
     <tr>
-        <td> <!-- PagSeguro -->
+        <!--
+        <td> PagSeguro
             <h3>
                 <div align="center">PagSeguro</div>
             </h3>
-            <a href="https://pag.ae/7_b_82K7Q">
+            <a href="https://pag.ae/bljJm47">
             <img src="https://stc.pagseguro.uol.com.br/public/img/botoes/doacoes/120x53-doar.gif"></a>
         </td>
+        -->
         <td> <!-- PayPal -->
             <h3>
                 <div align="center">PayPal</div>
