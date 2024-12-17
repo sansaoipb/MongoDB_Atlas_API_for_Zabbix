@@ -5,7 +5,7 @@
             <h3>
                 <div align="center">PagSeguro</div>
             </h3>
-            <a href="https://pag.ae/7_b_82K7Q/button">
+            <a href="https://sacola.pagbank.com.br/7dbe30ca-d9da-438f-aee2-5cef93d1b23c">
             <img src="https://stc.pagseguro.uol.com.br/public/img/botoes/doacoes/120x53-doar.gif"></a>
         </td>
         <td> <!-- PayPal -->
